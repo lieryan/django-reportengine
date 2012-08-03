@@ -21,21 +21,21 @@ class FilterControl(object):
         return {self.field_name:forms.CharField(label=self.label or self.field_name,required=False)}
 
     # Pulled from django.contrib.admin.filterspecs
+    @classmethod
     def register(cls, test, factory, datatype):
         cls.filter_controls.append((test, factory, datatype))
-    register = classmethod(register)
 
+    @classmethod
     def create_from_modelfield(cls, f, field_name, label=None):
         for test, factory, datatype in cls.filter_controls:
             if test(f):
                 return factory(field_name,label)
-    create_from_modelfield = classmethod(create_from_modelfield)
 
+    @classmethod
     def create_from_datatype(cls, datatype, field_name, label=None):
         for test, factory, dt in cls.filter_controls:
             if dt == datatype:
                 return factory(field_name,label)
-    create_from_datatype = classmethod(create_from_datatype)
 
 FilterControl.register(lambda m: isinstance(m,models.CharField),FilterControl,"char")
 
