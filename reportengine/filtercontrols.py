@@ -75,3 +75,24 @@ class ChoiceFilterControl(FilterControl):
             required=False,
             initial=self.initial,
             )}
+
+class PKModelChoiceField(forms.ModelChoiceField):
+    def clean(self, *args, **kwargs):
+        o = super(PKModelChoiceField, self).clean(*args, **kwargs)
+        return o.pk if o else ''
+class ModelChoiceFilterControl(ChoiceFilterControl):
+    def __init__(self, *args, **kwargs):
+        self.model = kwargs.pop('model', None)
+        self.queryset = kwargs.pop('queryset', self.model.objects.all())
+        self.initial = kwargs.pop('initial', None)
+        FilterControl.__init__(self, *args, **kwargs)
+    def get_fields(self):
+        return {
+            self.field_name: PKModelChoiceField(
+                queryset=self.queryset,
+                label=self.label or self.field_name,
+                required=False,
+                initial=self.initial,
+            )
+        }
+        
