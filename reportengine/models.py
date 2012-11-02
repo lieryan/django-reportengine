@@ -99,7 +99,7 @@ class ReportRequest(AbstractScheduledTask):
         
         for index, row in enumerate(rows):
             report_row = ReportRequestRow(report_request=self, row_number=index)
-            report_row.data = row
+            report_row.data = report.get_row_value(row)
             report_row.save()
         
         self.aggregates = aggregates

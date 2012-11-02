@@ -65,6 +65,10 @@ class Report(object):
         # CONSIDER worry about timezone? or just assume Django has this covered?
         raise NotImplementedError("Still an idea in the works")
 
+    def get_row_value(self, row):
+        """Called for each row before the value is saved to ReportRequestRow, can be used to modify stored value"""
+        return row
+
 class QuerySetReport(Report):
     # TODO make labels more addressable. now fixed to fields in model. what happens with relations?
     labels = None
