@@ -7,6 +7,7 @@ from django import forms
 from django.db import models
 from django.utils.translation import ugettext as _
 from django.utils.datastructures import SortedDict
+from django.utils.functional import lazy
 
 # TODO build register and lookup functions
 # TODO figure out how to manage filters and actual request params, which aren't always 1-to-1 (e.g. datetime)
@@ -81,6 +82,13 @@ class PKModelChoiceField(forms.ModelChoiceField):
         o = super(PKModelChoiceField, self).clean(*args, **kwargs)
         return o.pk if o else ''
 class ModelChoiceFilterControl(ChoiceFilterControl):
+    """ Filter control that takes choices from a model or queryset. 
+        
+        Example usage: 
+        
+            ModelChoiceFilterControl(model=Tag)
+            ModelChoiceFilterControl(model=Tag.objects.filter(name__startswith='H'))
+    """
     def __init__(self, *args, **kwargs):
         self.model = kwargs.pop('model', None)
         self.queryset = kwargs.pop('queryset', self.model.objects.all())
@@ -95,4 +103,13 @@ class ModelChoiceFilterControl(ChoiceFilterControl):
                 initial=self.initial,
             )
         }
-        
+class ExistingChoiceFilterControl(ChoiceFilterControl):
+    """ Filter control that takes choices from existing values of a particular column in the database. 
+        Example usage:
+            
+            ExistingChoiceFilterControl(Blog, 'title')
+    """
+    def __init__(self, model_class, field_name, *args, **kwargs):
+        kwargs['choices'] = lazy(lambda: [('', '---------')] + [(a, a) for a in model_class.objects.values_list(field_name, flat=True).distinct(field_name)], list)()
+        super(ExistingChoiceFilterControl, self).__init__(field_name, *args, **kwargs)
+
