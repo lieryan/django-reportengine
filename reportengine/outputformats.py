@@ -78,14 +78,18 @@ class XLSOutputFormat(OutputFormat):
     slug = 'xls'
     verbose_name = 'XLS (Microsoft Excel)'
 
-    def generate_output(self, context, output):
-        if not XLS_AVAILABLE:
-            raise ImproperlyConfigured('Missing module xlwt.')
-        ## Put all our data into a big list
+    def get_rows(self, context):
         rows = []
         rows.extend(context['aggregates'])
         rows.append(context['report'].labels)
         rows.extend(context['rows'])
+        return rows
+
+    def generate_output(self, context, output):
+        if not XLS_AVAILABLE:
+            raise ImproperlyConfigured('Missing module xlwt.')
+        ## Put all our data into a big list
+        rows = self.get_rows(context)
 
         ## Create the spreadsheet from our data
         workbook = xlwt.Workbook(encoding='utf8')
