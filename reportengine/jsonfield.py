@@ -27,7 +27,10 @@ class JSONFieldDescriptor(object):
 
     def __set__(self, instance, value):
         if not isinstance(value, (self.datatype, basestring)):
-            value = self.datatype(value)
+            if value is None: 
+                value = self.datatype()
+            else:
+                value = self.datatype(value)
         instance.__dict__[self.field.attname] = value
         try:
             delattr(instance, self.field.get_cache_name())
