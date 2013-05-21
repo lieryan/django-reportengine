@@ -46,7 +46,8 @@ class ReportRequest(AbstractScheduledTask):
     # TODO consider cleanup (when should this be happening? after the request is made? What about caching? throttling?)
     namespace = models.CharField(max_length=255)
     slug = models.CharField(max_length=255)
-    params = JSONField() #GET params
+    params = JSONField() # parameters that are submitted to ReportRequestView
+    run_params = JSONField(blank=True, null=True) # actual parameters used to build the report
     viewed_on = models.DateTimeField(blank=True, null=True)
     aggregates = JSONField(datatype=list)
     
@@ -102,6 +103,7 @@ class ReportRequest(AbstractScheduledTask):
             report_row.data = report.get_row_value(row)
             report_row.save()
         
+        self.run_params = mask
         self.aggregates = aggregates
         self.completion_timestamp = datetime.datetime.now()
         self.save()
